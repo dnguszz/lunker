@@ -1,0 +1,29 @@
+.navbar{
+    background-color: #333333;
+}
+
+.navbar-container{
+    margin: auto;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 48px;
+    max-width: 66vw;
+    width:auto !important;
+    font-size: 17px;
+    color: #dfdfdf;
+    font-family: Pretendard-Light;
+}
+
+li {
+    list-style:none;
+}
+
+a {
+    text-decoration: none;
+    color: #dfdfdf;
+    
+}
+a:hover {
+    color: white;
+ }

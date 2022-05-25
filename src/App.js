@@ -1,23 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Main from "./page/Main";
+import Point from "./page/Point";
+import Youtube from "./page/Youtube";
+import MyPage from "./page/MyPage";
+import Store from "./page/Store";
+import Nav from "./components/Nav";
+import Footer from "./components/Footer";
+import "./App.css";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          런커의 첫 화면입니다.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <header className="App-header"></header>
+      <Router>
+        <Nav />
+        <Routes>
+          <Route path="/" element={<Main />} />
+          <Route path="/point" element={<Point />} />
+          <Route path="/store" element={<Store />} />
+          <Route path="/youtube" element={<Youtube />} />
+          <Route path="/mypage" element={<MyPage />} />
+        </Routes>
+      </Router>
+      <Footer />
     </div>
   );
 }
