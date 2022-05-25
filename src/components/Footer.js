@@ -6,22 +6,17 @@ function Footer() {
     <div className='footer-container'>
             <section className="footer-subscription">
                 <p className="footer-subscription-heading">
-                    Join the Adventure newsletter to receive our best vacation deals
+                    런커넷(임시)의 푸터입니다
                 </p>
                 <p className="footer-subscription-text">
-                    You can unsubscribe at any time.
+                    뭔말을 적을지 모르겠네요
                 </p>
                 <div className="input-areas">
-                    <form>
-                        <input type="email" name = "email" placeholder = "Your Email" 
-                        className="footer-input"/>
-                        <button buttonStyle = 'btn--outline'>Subscribe</button>
-                    </form>
                 </div>
             </section>
             <div class='footer-divs'>
                 <div className='footer-div-wrapper'>
-                    <div class='footer-div-items'>
+                    <div className='footer-div-items'>
                         <h2>About Us</h2>
                         <div to='/sign-up'>How it works</div>
                         <div to='/'>Testimonials</div>
