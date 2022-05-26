@@ -9,7 +9,7 @@ function Main() {
   return (
     <div className="App">
       <Grid className="content-container" container justifyContent="center">
-        <Grid className="content1" item md={8} xs={10}>
+        <Grid item md={8} xs={10}>
           <div className="section-container">
             <div className="section1">
               <Link to="/point">

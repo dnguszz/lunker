@@ -19,7 +19,7 @@ const toFullString = (fish) => {
 function CurrentFish() {
   return (
     <Container>
-      <h3>Latest Catched Point</h3>
+      <h3>최근 등록 포인트.</h3>
       <List style={{ width: "100%", height: "100%", overflow: "auto" }}>
         {FishTemp.fish.slice(0,10).map((fishs, index) => (
           <ListItem key={index}>
