@@ -3,6 +3,7 @@ import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import styled from "@emotion/styled";
+import { Link } from "react-router-dom";
 
 function Login() {
   return (
@@ -14,21 +15,25 @@ function Login() {
             id="outlined-required"
             label="이메일ID"
             size="small"
-            fullWidth="true"
+            fullWidth={true}
           />
+          {/* {@가 안들어가면 alert} */}
+          {/* {정보 틀리면 alert} */}
           <StyledTextField
             id="outlined-required"
             label="비밀번호"
             size="small"
-            fullWidth="true"
+            fullWidth={true}
           />
-          <StyledButton fullWidth="true" variant="contained">
+          <StyledButton fullWidth={true} variant="outlined">
             로그인
           </StyledButton>
-          <StyledButton fullWidth="true" variant="outlined">
-            회원가입
-          </StyledButton>
-          <StyledButton fullWidth="true" variant="outlined">
+          <StyledLink to="/join">
+            <StyledButton fullWidth={true} variant="contained">
+              회원가입
+            </StyledButton>
+          </StyledLink>
+          <StyledButton fullWidth={true} variant="outlined">
             <img
               src={require("statics/images/google-logo.png")}
               alt="google-logo"
@@ -72,4 +77,8 @@ const StyledButton = styled(Button)`
   img {
     height: 1.5rem;
   }
+`;
+
+const StyledLink = styled(Link)`
+  width: 100%;
 `;
