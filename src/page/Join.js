@@ -7,9 +7,11 @@ import FormGroup from "@mui/material/FormGroup";
 import styled from "@emotion/styled";
 import Alert from "@mui/material/Alert";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { collection, addDoc } from "firebase/firestore";
-import { auth, fireStore } from "firebase-config";
+import { collection, addDoc, getDocs } from "firebase/firestore";
+import { auth, fireStore, storage } from "firebase-config";
+import { ref, uploadString, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 
 function Join() {
   const [email, setEmail] = useState(""); //필수
@@ -22,7 +24,7 @@ function Join() {
   const [passwordState, setPasswordState] = useState("null"); //null = 빈값, short = 6자 이하 ,different = 확인값이랑 다름,  correct = 가능
   const [nickNameState, setNickNameState] = useState("null"); //null = 빈값, short = 2자 미만 , duplicate = 중복, correct = 가능
 
-  const emailCheck = () => {
+  const emailCheck = async () => {
     //이메일 중복확인 버튼 클릭
     let regExp =
       /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
@@ -30,9 +32,22 @@ function Join() {
       setEmailState("incorrect");
       return;
     } else {
+      const querySnapshot = await getDocs(
+        collection(fireStore, "email-in-use")
+      );
+      let nickNameDupFlag = false;
+      querySnapshot.forEach((doc) => {
+        if (email === doc.data().email) {
+          setEmailState("duplicate");
+          nickNameDupFlag = true;
+          return;
+        }
+      });
+
+      if (nickNameDupFlag) return;
+      //이메일 중복 검사
       setEmailState("correct");
       return;
-      //중복 검사
     }
   };
 
@@ -49,29 +64,48 @@ function Join() {
     return;
   };
 
-  const nickNameCheck = () => {
+  const nickNameCheck = async () => {
     if (nickName.length < 2) {
       setNickNameState("short");
       return;
     } else {
+      const querySnapshot = await getDocs(
+        collection(fireStore, "nickname-in-use")
+      );
+      let nickNameDupFlag = false;
+      querySnapshot.forEach((doc) => {
+        if (nickName === doc.data().nickName) {
+          setNickNameState("duplicate");
+          nickNameDupFlag = true;
+          return;
+        }
+      });
+
+      if (nickNameDupFlag) return;
+      //닉네임 중복 검사
       setNickNameState("correct");
       return;
-      //중복 검사
     }
   };
 
   const register = async () => {
     try {
+      const storageRef = ref(storage, uuidv4());
+      let profileImgURL = "";
+
+      await uploadString(storageRef, profileImg, "data_url").then((snapshot) => {
+        getDownloadURL(snapshot.ref).then((url) => {
+          profileImgURL = url;
+        });
+      });
       const user = await createUserWithEmailAndPassword(auth, email, password);
       // 1. 이메일과 패스워드로 회원가입.
-      console.log(user);
       if (auth.currentUser != null) {
         updateProfile(auth.currentUser, {
           displayName: nickName,
-          photoURL: profileImg,
+          photoURL: profileImgURL,
         })
           .then(() => {
-            console.log("updated");
             navigate(`/`);
             //성공했으니 로그인정보 가지고 메인페이지로
           })
@@ -79,18 +113,35 @@ function Join() {
             console.log(error);
           });
         await addDoc(collection(fireStore, "email-in-use"), {
-          email
+          email,
         });
 
         await addDoc(collection(fireStore, "nickname-in-use"), {
-          nickName
+          nickName,
         });
-        //중복이 불가능한 이메일과 닉네임 피드에 값 추가.
+        //중복이 불가능한 이메일과 닉네임 파이어스토어에 추가.
       }
       // 2. 닉네임과 프로필사진 설정
     } catch (error) {
       console.log(error.message);
     }
+  };
+
+  const onImgChange = async (event) => {
+    const {
+      target: { files },
+    } = event; //es6문법인거같은데 자세히 봐야겠네요.
+    const file = files[0]; //어차피 하나만 업로드되니 첫번째 파일
+    const reader = new FileReader();
+    reader.onloadend = (finishedEvent) => {
+      const {
+        currentTarget: { result },
+      } = finishedEvent;
+      setProfileImg(result);
+      //이미지 문자열로 변경하고 이거 프로필이미지 state에 담습니다.
+    };
+    reader.readAsDataURL(file);
+    //적용된 이미지는 회원가입 버튼 누르면 스토리지에 저장되고 그 url이 회원정보에 담깁니다.
   };
 
   useEffect(() => {
@@ -99,14 +150,10 @@ function Join() {
 
   const navigate = useNavigate();
 
-  const tempC = () => {
-    console.log(auth.currentUser);
-  };
   return (
     <StyledGrid className="content-container" container justifyContent="center">
       <Grid item md={3} xs={10}>
         <Container>
-          <Button onClick={tempC}>사용자정보확인</Button>
           <TempLogo>Lunker</TempLogo>
           <StyledFormGroup row>
             <StyledTextField
@@ -185,7 +232,7 @@ function Join() {
           <StyledAvatar src={profileImg} sx={{ width: 100, height: 100 }} />
           <StyledButton fullWidth={true} variant="contained" component="label">
             프로필 사진 등록(선택)
-            <input type="file" hidden />
+            <input type="file" accept="image/*" onChange={onImgChange} hidden />
           </StyledButton>
           <StyledFormGroup row>
             <StyledTextField

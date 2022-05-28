@@ -1,11 +1,61 @@
-import React from "react";
+import React, { useState } from "react";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import styled from "@emotion/styled";
+import { useNavigate } from "react-router-dom";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { auth } from "firebase-config";
 import { Link } from "react-router-dom";
 
 function Login() {
+  const [email, setEmail] = useState("");
+  const [passWord, setPassWord] = useState("");
+
+  const navigate = useNavigate();
+
+  const login = () => {
+    signInWithEmailAndPassword(auth, email, passWord)
+      .then((result) => {
+        console.log(result);
+        //const user = result.user;
+        navigate(`/`);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const loginWithGoogle = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        // The signed-in user info.
+        const user = result.user;
+        console.log(user);
+        navigate(`/`);
+        // ...
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.email;
+        // The AuthCredential type that was used.
+        const credential = GoogleAuthProvider.credentialFromError(error);
+        console.log(error);
+        // ...
+      });
+  };
+
   return (
     <StyledGrid className="content-container" container justifyContent="center">
       <Grid item md={2} xs={10}>
@@ -16,6 +66,9 @@ function Login() {
             label="이메일ID"
             size="small"
             fullWidth={true}
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
           />
           {/* {@가 안들어가면 alert} */}
           {/* {정보 틀리면 alert} */}
@@ -24,8 +77,11 @@ function Login() {
             label="비밀번호"
             size="small"
             fullWidth={true}
+            onChange={(e) => {
+              setPassWord(e.target.value);
+            }}
           />
-          <StyledButton fullWidth={true} variant="outlined">
+          <StyledButton fullWidth={true} variant="outlined" onClick={login}>
             로그인
           </StyledButton>
           <StyledLink to="/join">
@@ -33,7 +89,11 @@ function Login() {
               회원가입
             </StyledButton>
           </StyledLink>
-          <StyledButton fullWidth={true} variant="outlined">
+          <StyledButton
+            fullWidth={true}
+            variant="outlined"
+            onClick={loginWithGoogle}
+          >
             <img
               src={require("statics/images/google-logo.png")}
               alt="google-logo"
