@@ -4,10 +4,11 @@ import "./Nav.css";
 import { Link } from "react-router-dom";
 
 function Nav() {
-  
+
   const { loginUser } = useSelector((state) => ({
     loginUser: state.userInfo.user,
   }));
+  //react-redux : 자동 구독
 
   return (
     <div className="navbar">
