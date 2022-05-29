@@ -3,30 +3,43 @@ import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import styled from "@emotion/styled";
+import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { setUser } from "module/userInfo";
 import { auth } from "firebase-config";
 import { Link } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [passWord, setPassWord] = useState("");
+  const [loginInputState, setLoginInputState] = useState("defalut"); //null = 초기값, incorrect = 잘못된 입력값, fail = 로그인 실패
 
   const navigate = useNavigate();
 
+  const dispatch = useDispatch();
+
   const login = () => {
+    let regExp =
+      /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+    if (!regExp.test(email) || passWord.length < 6) {
+      setLoginInputState("incorrect");
+      return;
+    }
     signInWithEmailAndPassword(auth, email, passWord)
       .then((result) => {
-        console.log(result);
-        //const user = result.user;
-        navigate(`/`);
+        setEmail("");
+        setPassWord("");
+        loginSuccess(result.user);
       })
       .catch((error) => {
         console.log(error);
+        setLoginInputState("fail");
       });
   };
 
@@ -38,9 +51,7 @@ function Login() {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         const token = credential.accessToken;
         // The signed-in user info.
-        const user = result.user;
-        console.log(user);
-        navigate(`/`);
+        loginSuccess(result.user);
         // ...
       })
       .catch((error) => {
@@ -51,9 +62,17 @@ function Login() {
         const email = error.email;
         // The AuthCredential type that was used.
         const credential = GoogleAuthProvider.credentialFromError(error);
+        setLoginInputState("fail");
         console.log(error);
         // ...
       });
+  };
+
+  const loginSuccess = async(user) => {
+    setLoginInputState("defalut");
+    await dispatch(setUser(user));
+    //스토어에 저장
+    navigate(`/`);
   };
 
   return (
@@ -66,6 +85,7 @@ function Login() {
             label="이메일ID"
             size="small"
             fullWidth={true}
+            length={email.length}
             onChange={(e) => {
               setEmail(e.target.value);
             }}
@@ -76,11 +96,24 @@ function Login() {
             id="outlined-required"
             label="비밀번호"
             size="small"
+            type="password"
             fullWidth={true}
             onChange={(e) => {
               setPassWord(e.target.value);
             }}
           />
+          {loginInputState === "incorrect" && (
+            <StyledAlert severity="error">
+              올바른 이메일, 비밀번호를 입력해주세요.
+            </StyledAlert>
+          )}
+
+          {loginInputState === "fail" && (
+            <StyledAlert severity="error">
+              이메일과 비밀번호를 확인해주세요.
+            </StyledAlert>
+          )}
+
           <StyledButton fullWidth={true} variant="outlined" onClick={login}>
             로그인
           </StyledButton>
@@ -140,5 +173,9 @@ const StyledButton = styled(Button)`
 `;
 
 const StyledLink = styled(Link)`
+  width: 100%;
+`;
+
+const StyledAlert = styled(Alert)`
   width: 100%;
 `;
