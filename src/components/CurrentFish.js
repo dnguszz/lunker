@@ -5,9 +5,6 @@ import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import FishTemp from "./FishTemp.json";
-import { style } from "@mui/system";
-
-console.log(FishTemp.fish);
 
 const toFullString = (fish) => {
   let str = "";
